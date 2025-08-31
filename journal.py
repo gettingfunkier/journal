@@ -29,6 +29,7 @@ def add_thru_terminal(data):
 
     with open(fileread, "w") as f:
         json.dump(data, f, indent=2)
+    return data
 
 def add_thru_text_box(data):
     date = get_valid_date()
@@ -50,6 +51,7 @@ def add_thru_text_box(data):
             json.dump(data, f, indent=2)
 
         root.destroy()
+        return data
 
     root = tk.Tk()
     root.title("Journal Entry")
@@ -61,6 +63,12 @@ def add_thru_text_box(data):
     save_button.pack(pady=(0, 10))
 
     root.mainloop()
+    try:
+        with open(fileread, "r") as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        data = {}
+    return data
 
 def edit_entry(data):
     date = get_valid_date()
@@ -86,6 +94,7 @@ def edit_entry(data):
         print("[i] Entry updated.")
     else:
         print("[x] No changes made.")
+    return data
 
 def remove_entry():
     try:
@@ -129,10 +138,17 @@ def get_valid_date(prompt="date [YYYY-MM-DD]: "):
             print("[!] Invalid date format! Please use YYYY-MM-DD.")
 
 def export_to_file(data):
-    with open(filewrite, "w") as file:
-        for date, entry in data.items():
-            file.write(f"{date}:\n{entry}\n\n")
-    print(f"\n[i] Diary entries exported to {filewrite} successfully!")
+    if not data:
+        print("[x] No journal entries to export.")
+        return
+
+    try:
+        with open(filewrite, "w") as file:
+            for date, entry in data.items():
+                file.write(f"{date}:\n{entry}\n\n")
+        print(f"\n[i] Diary entries exported to {filewrite} successfully!")
+    except Exception as e:
+        print(f"[x] Error exporting entries: {e}")
 
 def main():
     data = load_data()
